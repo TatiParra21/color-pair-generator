@@ -1,11 +1,11 @@
 import type {  ComponentType} from "../types"
 import { useRef, useState, useMemo } from "react"
 import { hexSizeAndStyleStore, colorDataStore, authStateStore, selectUpdateUserSchemes} from "../store/projectStore"
-import { saveColorSchemeForUser, type SavedUserColorSchemeType, sendUserDeleteRequest } from "../functions/requestFunctions"
+import { saveColorSchemeForUser, sendUserDeleteRequest } from "../functions/requestFunctions"
 import { supabase } from "../supabaseClient"
-import {type UserSchemesData } from "../store/projectStore"
 import { useNavigate } from "react-router-dom" 
 import { updateSchemeNameForUser } from "../functions/requestFunctions"
+import { type UserSchemeDataType, } from "../types"
 //import { useReturnColorStoreData } from "../functions/useReturnColorStoreData"
 const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:string|number, aatext:boolean, aaatext:boolean})=>{
   return(
@@ -45,7 +45,7 @@ export const ComponentBase =({ variant,colorName, mainStyle}: ComponentType)=>{
       const [[hex1,hex1name],[hex2,hex2name]] = hexAndNamePairs
     const alreadyExists = useMemo(()=>{
       return userSchemes?.some(
-        (scheme: UserSchemesData) =>
+        (scheme: UserSchemeDataType) =>
           (scheme.hex1 === hex1 && scheme.hex2 === hex2) ||
           (scheme.hex1 === hex2 && scheme.hex2 === hex1) // just in case order matters
       )
@@ -67,8 +67,7 @@ export const ComponentBase =({ variant,colorName, mainStyle}: ComponentType)=>{
           if(error)throw new Error(error.message)
           if(!data.session) navigate("/sign-in",{state:{fromFeature:"save"}})
             else if(data.session.user.id){         
-          const savedSchemeInfo : SavedUserColorSchemeType ={
-            user_id: data.session.user.id,
+          const savedSchemeInfo : UserSchemeDataType ={
             scheme_name:"",
             hex1:hex1,
             hex1name:hex1name,
@@ -115,7 +114,7 @@ export const ComponentBase =({ variant,colorName, mainStyle}: ComponentType)=>{
     )
 }
 
-export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesData})=>{
+export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemeDataType})=>{
    
    const copyHex = colorDataStore(state=>state.copyHex)
     const setIsDisabled = colorDataStore(state=>state.setIsDisabled)
@@ -132,14 +131,14 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
         }
 }
    const textType = hexSizeAndStyleStore(state=>state.textType)
-  const {aaatext,aatext,contrast_ratio, hex1,hex2, hex1name, hex2name, scheme_name} = userScheme
+  const {aaatext,aatext,contrast_ratio, hex1,hex2, hex1name, hex2name, scheme_name,id} = userScheme
   const foreGroundColor = {hex:hex1, name:hex1name}
   const backGroundColor = {hex:hex2, name:hex2name}
   const [openChangeName, setOpenChangeName] = useState<boolean>(false)
-  const userId = authStateStore(state=>state.userId)
+
   const removeScheme =async()=>{
-    if(!userId)return
-    await sendUserDeleteRequest({user_id:userId, hex1:hex1, hex2:hex2})
+    if(!id)return
+    await sendUserDeleteRequest(id)
    await updateUserSchemes()
 
   }
@@ -155,10 +154,10 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
     setOpenChangeName(prev=>!prev)
   }
   const changeSchemeName =async()=>{
-    if(!userId)return
+    
     const newScheme = nameRef.current?.value
-    if(!newScheme)return 
-    await updateSchemeNameForUser({user_id:userId, scheme_name:newScheme, hex1:hex1, hex2:hex2})
+    if(!newScheme || !id)return 
+    await updateSchemeNameForUser( id,newScheme)
     await updateUserSchemes()
     openChangeNameComp()
   }

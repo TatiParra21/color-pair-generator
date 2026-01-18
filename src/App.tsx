@@ -49,12 +49,12 @@ const initAuth = authStateStore(state=>state.initAuth)
       try{
        initAuth()
       }catch(err){
+        console.log(err)
       }
     }
     runInitAuth() 
   },[])
 
-  
   return (
     <>
     <Provider>

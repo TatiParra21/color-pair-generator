@@ -2,28 +2,9 @@ import type { ColorSchemeTypeArr, ColorType } from "../types"
 import { getColorName } from "./fetchColorSchemes"
 import { supabase } from "../supabaseClient"
 import {type ColorSchemeType } from "../types"
-import type { FrontEndColorType, SavedUserColorSchemeType} from "../types"
+import type { FrontEndColorType,UserSchemeDataType} from "../types"
 import pLimit from "p-limit"
 const supabaseLimiter =pLimit(3)
-const sendRequestWithBody =async(method:string,body: Array<Record<string,string|number|boolean|string[]>>, //this states the body should be an object, where every key, and every val is a string
-     route:string,
-     token?:string,
-    ): Promise<void>=>{    
-    const response = await fetch(`https://compoundlibrarycopy.onrender.com/api/${route}`,{
-        method:method,
-        headers:{
-            "Content-Type":"application/json",
-         ...(token ? { Authorization: `Bearer ${token}` } : {})
-
-        },
-        body: JSON.stringify(body) //stringifies the info for the backend
-    })
-    const data = await response.json()
-    if(!data.found)console.log(`added to ${route} color: `, data)        
-}
-
-
-
 
 import { PostgrestError } from "@supabase/supabase-js"
 
@@ -49,10 +30,7 @@ if(Array.isArray(data) && data.length < 1) return null
       }
       return null
     }
-
 }
-
-
 const saveNamedColor = async(newColors:FrontEndColorType[])=>{
     console.log("savedNamedColor")
     const {error} = await supabase
@@ -82,7 +60,6 @@ const saveColorContrast =async(contrasts: FrontEndColorContrastType[])=>{
 
         }
     }
-
 }
 
 export const checkFunction=()=>{
@@ -90,7 +67,7 @@ export const checkFunction=()=>{
     console.log("ain ")
 }
 export const checkIfVariantInDB = async(hex: string):Promise<ColorType[] | null>=>{
- //console.log("🔥🔥🔥 THIS EXACT FILE RAN 🔥🔥🔥", hex)
+ console.log("🔥🔥🔥 THIS EXACT FILE RAN 🔥🔥🔥", hex)
  console.log("what??")
  //
  //console.log("WHHYY??", hex)
@@ -153,10 +130,8 @@ for(const col of otherColors){
     hexVariantArr.push({hex,closest_named_hex, clean_hex})
     colorContrastArr.push({hex1,hex2,contrast_ratio:Number(contrast_ratio),aatext,aaatext})
     }
-    //await sendRequestWithBody("POST",colorContrastArr,"color_contrasts")
-    await saveColorContrast(colorContrastArr)
-    //await sendRequestWithBody("POST",hexVariantArr,"hex_variants")
-    await saveHexVariant(hexVariantArr)
+   await supabaseLimiter(()=>saveColorContrast(colorContrastArr)) 
+    await supabaseLimiter(()=>saveHexVariant(hexVariantArr))  
 }
 export const addHexVariantsArr = async(otherColors: ColorSchemeTypeArr)=>{
      const hexVariantArr:FrontEndHexBodyType[] = []
@@ -166,33 +141,20 @@ export const addHexVariantsArr = async(otherColors: ColorSchemeTypeArr)=>{
     hexVariantArr.push({hex,closest_named_hex, clean_hex})
     colorNameArr.push({name, closest_named_hex})
     }
-    //await sendRequestWithBody("POST",colorNameArr, "named_colors")
-   // await sendRequestWithBody("POST",hexVariantArr,"hex_variants")
-     await saveNamedColor(colorNameArr)
-     await saveHexVariant(hexVariantArr)
+     await supabaseLimiter(()=>saveNamedColor(colorNameArr))  
+    await supabaseLimiter(()=>saveHexVariant(hexVariantArr))  
 }
 
-export type UserSchemeRowType ={
-     aaatext: boolean,
-     aatext:boolean,
-     contrast_ratio:number,
-     hex1:string,
-     hex1name:string, 
-     hex2:string, 
-     hex2name:string,
-     id:number,
-     scheme_name: string
-     
-}
+
 
 
 ///LOGGED IIN USER REQUESTS
-export const getUserSavedSchemesRequest=  async(): Promise<UserSchemeRowType[] |null>=>{
+export const getUserSavedSchemesRequest=  async(): Promise<UserSchemeDataType[] |null>=>{
     console.log("SUPABASE QUERY START");
 const { data, error } = await supabase
   .from("saved_user_color_schemes")
   .select("aaatext,aatext,contrast_ratio,hex1,hex1name, hex2, hex2name,id,scheme_name")
-  .order('created_at', { ascending: false }).overrideTypes<UserSchemeRowType[]>()
+  .order('created_at', { ascending: false }).overrideTypes<UserSchemeDataType[]>()
    if (error){
         console.log((error))
         throw error
@@ -202,17 +164,17 @@ console.log("SUPABASE QUERY END", { data, error });
     return data 
 }
 export type DeleteUserColorSchemeType={
-    user_id:string,
+   id:string,
     hex1:string,
     hex2:string,
 }
-export const sendUserDeleteRequest =async(schemeToDelete: DeleteUserColorSchemeType)=>{
+export const sendUserDeleteRequest =async(id:number)=>{
     try{
           const { data, error } = await supabase
-  .from("saved_user_color_schemes")
-  .delete()
-  .eq("hex1", schemeToDelete.hex1)
-  .eq("hex2", schemeToDelete.hex2)
+        .from("saved_user_color_schemes")
+        .delete()
+        .eq("id",id)
+       
   
 if(error)throw error
 return data
@@ -221,7 +183,7 @@ return data
     }
 }
 
-export const saveColorSchemeForUser =async(pickedScheme: SavedUserColorSchemeType)=>{
+export const saveColorSchemeForUser =async(pickedScheme: UserSchemeDataType)=>{
     const {scheme_name, hex1,hex1name, hex2,hex2name,contrast_ratio, aatext, aaatext} = pickedScheme
     const { error } = await supabase.from("saved_user_color_schemes").
     upsert({
@@ -242,10 +204,18 @@ export const saveColorSchemeForUser =async(pickedScheme: SavedUserColorSchemeTyp
 
 
 
-export const updateSchemeNameForUser =async(pickedScheme: UpdateUserColorSchemeNameType)=>{
-    const accessToken = await getAccessToken()
-            if(!accessToken) throw new Error(" no accesss token")
-                const route = `userId/saved_user_color_schemes`
-     await sendRequestWithBody("PATCH",[pickedScheme], route,accessToken)
+export const updateSchemeNameForUser =async(id:number, scheme_name:string)=>{
+    try{
+         const {error} = await supabase.from("saved_user_color_schemes").upsert({scheme_name:scheme_name}).eq("id", id)
+   if(error)throw error
+
+    }catch(err){
+              if(err instanceof Error){
+
+            console.log(err.message)
+        }
+        throw new Error(`in user updateSchemeNameForUser in requestFunctions ${err}`)
+  
+    }
 }
 

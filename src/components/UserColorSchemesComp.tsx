@@ -1,14 +1,15 @@
 
 import { HexInfo } from "../components/HexInfo"
 import { useNavigate } from "react-router-dom"
-import { authStateStore, selectSession, selectUserSchemes, type UserSchemesData } from "../store/projectStore"
+import { authStateStore, selectSession, selectUserSchemes } from "../store/projectStore"
 import {  UserSchemeComponentBase } from "./ComponentBase"
 import { LoadingRoller } from "./LoadingRoller"
 import { useState, useEffect } from "react"
+import type{ UserSchemeDataType } from "../types"
 
  const UserColorSchemesComp =()=>{
    const [loading, setLoading] = useState<boolean>(true)
-   const userSchemes:UserSchemesData[] |null = authStateStore(selectUserSchemes)
+   const userSchemes:UserSchemeDataType[] |null = authStateStore(selectUserSchemes)
    const session = authStateStore(selectSession)
    const navigate = useNavigate()
     useEffect(()=>{
@@ -22,7 +23,7 @@ import { useState, useEffect } from "react"
        
    if(loading || !userSchemes )return <div>{ loading ? <LoadingRoller/> : "no ColorSchemes yet"}</div>
   
-   const allComponents = userSchemes.map((scheme: UserSchemesData)=>{
+   const allComponents = userSchemes.map((scheme: UserSchemeDataType)=>{
         return(<UserSchemeComponentBase key={`${scheme.hex1}-${scheme.hex2}-scheme`} userScheme={scheme}/>)
          }
         )

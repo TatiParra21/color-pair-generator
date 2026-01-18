@@ -38,21 +38,18 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
         const requestKey = `${color}-${debouncedValue.count}`
         if(lastRequestRef.current == requestKey) return
         lastRequestRef.current = requestKey
-
         const fetchAll =async() =>{
             try{  
                 const colorInfo : ColorInfo = await getAllColorInfo(color, debouncedValue.count,setLoadingProgress)  
                 if(!colorInfo) throw new Error( "Color picker could not get colorInfo")
                     if(!cancelled){
                          setAllInfo(colorInfo)
-                    }
-               
+                    }        
             }catch(err){
                  if (!cancelled) {
                     setErrorMessage(handleError(err, "ColorPicker"));
                 }      
-         }finally{
-            
+         }finally{       
             if (!cancelled) {
                 setLoading(false);
       }

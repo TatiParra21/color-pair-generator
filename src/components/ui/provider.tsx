@@ -6,7 +6,7 @@ import {
   type ColorModeProviderProps,
 } from "./color-mode"
 import { system } from "../../theme"
-console.log(system, "syss")
+
 export function Provider(props: ColorModeProviderProps) {
   return (
     <ChakraProvider value={system}>

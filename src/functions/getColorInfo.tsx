@@ -2,21 +2,22 @@
 import chroma from "chroma-js"
 import { getContrastRatio } from "./fetchColorSchemes"
 import type { ColorType, ColorInfo, ColorSchemeTypeArr,ColorSchemeType } from "../types"
-import { checkIfVariantInDB,checkIfContrastIn, type checkIfVariantInDBResult, handleSingleColor} from "./requestFunctions"
+import { checkIfVariantInDB,checkIfContrastIn, handleSingleColor} from "./requestFunctions"
 import { addHexVariantsArr, addColorContrastsArr } from "../functions/requestFunctions"
 import { getColorName } from "./fetchColorSchemes"
-import { type VariantResType } from "./requestFunctions"
+
 import pLimit from 'p-limit';
+import { handleError } from "./handleError"
 const limit = pLimit(10);
 const saveAllData =async(bestColors: ColorSchemeTypeArr, baseColor: string)=>{
     /*this function has 2 functions meant to update the database in supabase */
     await addHexVariantsArr(bestColors) //saves hex variants to the hex_variants table in supabase
-    await addColorContrastsArr(baseColor,bestColors)/* 
+    await addColorContrastsArr(baseColor,bestColors)
+    /* 
     this function saves all the resulting colors from the chosen main color. It saves the ratio, name etc so it doesn't have to 
     us the API again. 
     */
 }
-
 const colorContrastCache : Map<ColorType, ColorSchemeType> = new Map<ColorType,ColorSchemeType>()
 const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
   console.log("we came here")
@@ -146,7 +147,7 @@ export const generateContrastingColors =async(baseColor: string, count: number=5
         turn++
     }
     }catch(err){
-       throw err
+       handleError(err,"getColorInfo")
     }finally{
           setLoadingProgress("0")
           saveAllData(bestColors, baseColor)

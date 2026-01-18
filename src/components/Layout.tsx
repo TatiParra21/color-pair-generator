@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom"
 import {type JSX } from "react"
 import Header from "./Header"
 import { NavLink } from "react-router-dom"
-import { authStateStore, selectEmail, selectSession, selectUserId } from "../store/projectStore"
+import { authStateStore, selectEmail, selectSession } from "../store/projectStore"
 import { UserMenu, } from "./UserMenu"
 const SignInUpComponents =():JSX.Element=>{
     return(
@@ -13,7 +13,7 @@ const SignInUpComponents =():JSX.Element=>{
     )
 }
 //  
-const UserIsSignedIn =({ email }: { email: string, userId:string |null})=>{
+const UserIsSignedIn =({ email }: { email: string, })=>{
     return(
         <div className="self-end gap-2 flex flex-row"> 
           <NavLink to="my-color-schemes" >My ColorSchemes</NavLink> 
@@ -23,12 +23,12 @@ const UserIsSignedIn =({ email }: { email: string, userId:string |null})=>{
 }
  const Layout =()=>{
     const session = authStateStore(selectSession)
-  const userId = authStateStore(selectUserId)
     const email = authStateStore(selectEmail)
+    console.log(session, "SESION hER")
     return(
         <>
             <main className="w-full">
-                {session ? <UserIsSignedIn email={email} userId={userId}/> : <SignInUpComponents/>}
+                {session ? <UserIsSignedIn email={email} /> : <SignInUpComponents/>}
                     <Header/>
                     <Outlet/>
             </main>

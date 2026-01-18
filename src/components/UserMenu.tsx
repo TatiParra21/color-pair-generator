@@ -38,6 +38,7 @@ export const UserMenu = ({ email }: { email: string }) => {
  const signOut = authStateStore(selectSignOut)
   const handleLogout=async()=>{ 
     try{
+      console.log("sign out")
       await signOut()
     }catch(err){
       console.error(err)

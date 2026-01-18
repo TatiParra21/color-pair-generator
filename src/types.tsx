@@ -11,6 +11,8 @@ export type ColorAndSchemeType ={
     pickedColor: ColorInfo
     colorScheme: ColorSchemeTypeArr
 }
+
+/*
 export type SavedUserColorSchemeType={
   user_id:string,
   scheme_name:string,
@@ -21,6 +23,19 @@ export type SavedUserColorSchemeType={
   contrast_ratio: number, 
   aatext:boolean, 
   aaatext:boolean
+}
+*/
+
+export type UserSchemeDataType ={
+    scheme_name: string,
+    hex1:string,
+    hex1name:string, 
+    hex2:string, 
+    hex2name:string,
+    contrast_ratio:number, 
+    aaatext: boolean,
+    aatext:boolean,  
+    id?:number,   
 }
 export type ColorSchemeTypeArr = ColorSchemeType[]
 
@@ -44,22 +59,9 @@ export type ColorInfo ={
 }
 
 export type ColorNameType = Omit<ColorInfo,"hex">
-export type checkIfVariantInDBResult ={
-    results?: ColorType[]
-    message: string
-    found: boolean
-}
+
 export type FrontEndColorType ={
 name:string, closest_named_hex: string
-}
-export type VariantResType ={
-    name:string,
-    hex:string,
-    clean_hex:string,
-    contrast_ratio: number, 
-    aatext:boolean, 
-    aaatext:boolean,
-    closest_named_hex: string
 }
 
 export type ComponentStyleType ={
@@ -71,14 +73,7 @@ export type ComponentStyleType ={
   width?:string
   
 }
-export type UpdateUserColorSchemeNameType={
-  user_id:string,
-  scheme_name:string,
-    hex1:string,
-    hex2:string,
-}
-export type ComponentType ={
-   
+export type ComponentType ={ 
     variant:ColorSchemeType,
     colorName: string,
     mainStyle: ComponentStyleType,

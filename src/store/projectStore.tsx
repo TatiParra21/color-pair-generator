@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import type { ColorInfo } from "../types";
 import { supabase } from "../supabaseClient";
-import { getUserSavedSchemesRequest, type UserSchemeRowType } from "../functions/requestFunctions";
-
+import { getUserSavedSchemesRequest,  } from "../functions/requestFunctions";
+import { type UserSchemeDataType } from "../types";
 export type HexSizeAndStyleStoreType ={
     textType: "Normal" | "Large",
     setTextType: (value:"Normal" | "Large")=>void,
@@ -93,21 +93,13 @@ export const paginationStore = create<PaginationStoreType>(set=>({
 }))
 
 
-export type UserSchemesData={
-  scheme_name:string,
-  hex1:string,
-  hex1name:string,
-  hex2:string,
-  hex2name:string,
-  contrast_ratio: number, 
-  aatext:boolean, 
-  aaatext:boolean
-}
+
+import {type Session } from '@supabase/supabase-js'
 export type AuthStateType = {
-  session: any | null,
-  userId:string |null,
-  userSchemes: UserSchemesData[] |null,
-  fetchUserSchemes: () =>Promise<UserSchemeRowType[] | null>,
+  session: Session | null,
+  userSchemes: UserSchemeDataType[] | null,
+  fetchUserSchemes: () =>Promise<UserSchemeDataType[] | null>,
+  authSubscription: null |{ unsubscribe: () => void },
     email:string,
     authError: string |null,
     setAuthError:  (message:string|null)=>void,
@@ -116,78 +108,72 @@ export type AuthStateType = {
   signOut:()=>Promise<void>
 
 }
-export const authStateStore = create<AuthStateType>((set)=>{
+export const authStateStore = create<AuthStateType>((set,get)=>{ 
     let sessionInProgress = false;   
-    let authListener: { unsubscribe: () => void } | null = null;
     return{
         session:  null,
-        userId: null,
         userSchemes:null, 
         authError: null,
         setAuthError:  (message:string|null)=>set({authError:message}),
-        fetchUserSchemes: async(): Promise<UserSchemeRowType[] | null>=>{    
-           const userSchemes: UserSchemeRowType[] | null = await getUserSavedSchemesRequest()       
-        return userSchemes
-    
+        fetchUserSchemes: async(): Promise<UserSchemeDataType[] | null>=>{    
+           const userSchemes: UserSchemeDataType[] | null = await getUserSavedSchemesRequest()       
+            return userSchemes  
     },
         email:"",
         updateUserSchemes: async()=>{
-            const updatedSchemes =await authStateStore.getState().fetchUserSchemes()
-        
+            const updatedSchemes:UserSchemeDataType[] | null =await authStateStore.getState().fetchUserSchemes()     
             if(updatedSchemes){
                 set({userSchemes:updatedSchemes})
             }
         },
+        authSubscription:null,
         initAuth: async() => {
             try{
-                if(sessionInProgress)return
-                sessionInProgress = true
-                const {data, error} = await supabase.auth.getSession()
-                if(!data)throw new Error("error was here")
-                if(error)throw error
-                set({session:data.session,
-                    })
-            }catch(err){
+                   if(sessionInProgress)return
+                sessionInProgress = true 
+                console.log("new sess")             
+                const {data:{session:initialSession}, error} = await supabase.auth.getSession()
+                if(initialSession){
+                       set({ session: initialSession, email: initialSession.user.email });
+                        // Start fetching data early
+                        get().updateUserSchemes();
+                }    
+                const {data:{user}, error:userError} = await supabase.auth.getUser()           
+                 if (userError || !user) {
+                    set({session:null})
+       // const schemes = await get().fetchUserSchemes();
+       // set({ set:data.session });
+    }
+
+
+       if(!get().authSubscription){
+      const {data:{subscription}}=  supabase.auth.onAuthStateChange(async(event, newSession) => {
+            console.log("change", event)
+            if(newSession){
+               await get().updateUserSchemes();
+                 console.log(newSession, "session")
+            set({ session: newSession,
+                email: newSession?.user?.email,     
+            });
+            }
+              
+        });
+        set({authSubscription:subscription})
+       } 
+       
+        }catch(err){
             console.warn("Auth lock error ignored", err)
             console.error("there was an error here")
-            }finally {
-                sessionInProgress = false;
             }    
-       const {data}= supabase.auth.onAuthStateChange(async(_event, newSession) => {
-            console.log(newSession?.user, "SOmehting changed?")
-       if(newSession){
-         console.log(newSession, "session")
-         console.log("sommethng",newSession?.user?.id)
-         const userData= await authStateStore.getState().fetchUserSchemes();
-        set({ session: newSession,
-                userId:newSession?.user?.id,
-                email: newSession?.user?.email,
-                userSchemes:userData
-          });
-       }else{
-        set({ session: null,
-                userId:null,
-                email: "",
-                userSchemes:null 
-          });
-       }       
-        });
-        authListener = data.subscription
-    },    
+    }, 
+    
     signOut:  async()=>{       
     try{    
-        await supabase.auth.refreshSession();
-        const { data: { session } } = await supabase.auth.getSession();
-          console.log("Session before signOut:", session);
-        if (!session) {
-            // No session, just clear local state
-            set({ session: null, userId:null, email: "", userSchemes:null });
-            return;
-        }
-        // Try signOut without scope
+
+        // Try signOut
         const {error} = await supabase.auth.signOut()
         if(error) throw new Error(error.message)
-        set({ session: null, userId:null, email: "", userSchemes:null });       
+        set({ session: null, email: "", userSchemes:null, authSubscription:null });       
     }catch(err){
         console.error(err)
     }   
@@ -196,7 +182,6 @@ export const authStateStore = create<AuthStateType>((set)=>{
 })
 
 export const selectSession = (state:AuthStateType)=>state.session
-export const selectUserId = (state:AuthStateType)=>state.userId
 export const selectEmail = (state:AuthStateType)=>state.email
 export const selectUserSchemes = (state:AuthStateType)=>state.userSchemes
 export const selectUpdateUserSchemes = (state:AuthStateType)=>state.updateUserSchemes

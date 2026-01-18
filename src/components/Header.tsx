@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { checkFunction } from "../functions/requestFunctions"
+
 const Header: React.FC =()=>{
     type SelectedStyles ={
         color: string,
@@ -14,7 +14,7 @@ const Header: React.FC =()=>{
     const selectedStyle ={
         ...defaultSelectedStyle,
         color:"red"
-    }
+    } 
 
     return(
         <div className="header">
@@ -25,7 +25,7 @@ const Header: React.FC =()=>{
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="/">Dashboard</NavLink>
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="badges">Badges</NavLink>                   
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="cards">Cards</NavLink>
-                      <button onClick={checkFunction}>chce</button>
+                      
                     </nav>
                 </div>
         </div>

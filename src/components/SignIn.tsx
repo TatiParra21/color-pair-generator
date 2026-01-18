@@ -2,6 +2,7 @@ import { LoginButton } from "./LoginButton";
 import { supabase } from "../supabaseClient"
 import {authStateStore} from "../store/projectStore"
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
+import { useState } from "react";
 const capitalizeFirstLetter =(value: string):string=>{
     return value.charAt(0).toUpperCase() + value.slice(1)
   }
@@ -27,43 +28,45 @@ const InputComponent =({type, category}:{type:string, category:string})=>{
 }
 export const FormComponent = ({type}:{type:string})=>{
     const navigate = useNavigate()
+    const [loading, setLoading] = useState<boolean>(false)
     const authError = authStateStore(state => state.authError)
     const setAuthError = authStateStore(state => state.setAuthError)
     const location = useLocation()
     const fromFeature = location.state?.fromFeature ? location.state.fromFeature : ""
     const handleSubmit=async(e: React.FormEvent<HTMLFormElement>)=>{
        e.preventDefault()
+       setLoading(true)
         const form = e.currentTarget;
         const formData = new FormData(form);
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
-        let errorMessage:string
-        const { data, error} = type == "sign-in" ? await supabase.auth.signInWithPassword({email, password}) : await supabase.auth.signUp({email, password})
+        try{
+    const { data, error} = type == "sign-in" 
+    ? await supabase.auth.signInWithPassword({email, password}) 
+    : await supabase.auth.signUp({email, password})
           if (error) {        
-    // Special case: Google-linked account trying email login
-    if (
-      type === "sign-in" &&
-      error.message.toLowerCase().includes("invalid login credentials")
-    ){
-      errorMessage = "This email is linked with Google. Please sign in with Google instead."
-    } else {
-      errorMessage = error.message
-    }
-    setAuthError(errorMessage)
-    return
-  }
-        if (!data.session) {        
-            if (data.user?.aud === "authenticated") {
-              errorMessage = !data.user.user_metadata.provider ? "Account already exists, please sign in."
-              : !data.user.user_metadata?.email_verified ? "Email has not been verified yet." : "Unknown Error"
-            }else{
-              errorMessage  = "No session returned. Check credentials."}
-            setAuthError(errorMessage)
-            return
-          }         
+          setAuthError(error.message);
+        return}
+        if (type =="sign-up" && !data.session) {        
+         alert("Check your email for the confirmation link!");
+          navigate("/login");
+          return
+            }
+          if(data.session){
+            console.log("dara sessioN HEREEE")
             setAuthError(null)
             console.log("session is here")
-            navigate("/")           
+            navigate("/") 
+
+          }         
+        }
+        catch(err){
+          if(err instanceof Error)
+            setAuthError("An unexpected error occurred.");
+        }finally{
+          setLoading(false)
+        }
+              
     }
     return(
         <div className="flex flex-col">
@@ -75,7 +78,7 @@ export const FormComponent = ({type}:{type:string})=>{
                 <InputComponent category="email" type={type}/>
                 <InputComponent category="password" type={type}/>
               {authError && <p>{authError}</p>}
-                <button type="submit">{type == "sign-in" ? "Sign In": "Sign Up"}</button>
+                <button disabled={loading} type="submit">{type == "sign-in" ? "Sign In": "Sign Up"}</button>
             </form>
             <LoginButton/>
                  {
