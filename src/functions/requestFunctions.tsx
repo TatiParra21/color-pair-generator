@@ -67,9 +67,7 @@ export const checkFunction=()=>{
     console.log("ain ")
 }
 export const checkIfVariantInDB = async(hex: string):Promise<ColorType[] | null>=>{
- console.log("🔥🔥🔥 THIS EXACT FILE RAN 🔥🔥🔥", hex)
- console.log("what??")
- //
+
  //console.log("WHHYY??", hex)
  const { data, error }:{data:ColorType[] | null, error: PostgrestError | null}= await supabase.rpc(
   "get_hex_variants",

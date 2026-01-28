@@ -18,13 +18,12 @@ const Header: React.FC =()=>{
 
     return(
         <div className="header">
-            <h1>My Component Library</h1>
+            <h1>Color Pair Generator</h1>
                 <div className="top-tab">
                    
                     <nav >
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="/">Dashboard</NavLink>
-                        <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="badges">Badges</NavLink>                   
-                        <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="cards">Cards</NavLink>
+                        <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="badges">Pairs</NavLink>                   
                       
                     </nav>
                 </div>

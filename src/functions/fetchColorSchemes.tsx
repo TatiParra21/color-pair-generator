@@ -20,18 +20,28 @@ export const createVariantsArray =(sameColor: Set<string>,hexValue: string, resp
 }
 export const getColorName =async(hexNum:string): Promise<ColorType>=>{
     try{  
-    const res = await fetch(`https://www.thecolorapi.com/id?hex=${hexNum.slice(1)}`)
-        if(!res)throw new Error("response failed")
+    const res = await fetch(`https://www.thecolorapi.com/id?hex=${hexNum.slice(1)}ii`)
+    console.log(res)
+           if (!res.ok) {
+      throw new Error(`Color API HTTP error: ${res.status}`);
+    }
                     const data = await res.json()
+                       //  API returned malformed data
+                if (!data?.hex || !data?.name) {
+                    throw new Error("Color API returned invalid structure");
+                    }
                     const {hex, name} = data
                     if(!hex && !name)throw new Error("hex or name not found")
                         const {clean:clean_hex, value} = hex
                         const colorName = name.value
                         const closest= name.closest_named_hex
-                    if(!clean_hex && !colorName && !value )throw new Error("none")  
+                      if (!clean_hex || !value || !colorName || !closest) {
+                        throw new Error("Color API missing required color fields");
+    }
                     return {name:colorName, hex:value, clean_hex,closest_named_hex:closest}
     }catch(err){
-            throw err
+             console.error("getColorName failed:", err);
+            throw err;
         }
 }
 export const getContrastRatio =(colorNameObj:ColorType, baseColor :string):ColorSchemeType=>{

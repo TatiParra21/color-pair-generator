@@ -12,6 +12,10 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
    const colorRef = useRef<string>("") //Reference to store latest color input, 
    const timerRef = useRef<NodeJS.Timeout | null>(null)
    const lastRequestRef = useRef<string>("")
+   /*
+   the const velues returned below are from Zustand store, they come from a custom hook that 
+   returns them from useShallow.
+   */
     const {
         allInfo, loading, color, isDisabled,
         debouncedValue, setColor, setAllInfo,
@@ -20,7 +24,10 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
         } = useReturnColorStoreData()
    const  setTotal =paginationStore(state=>state.setTotal)
     const setCurrentPage =paginationStore(state=>state.setCurrentPage)
-        //Saves fetched colors to Supabase everytime allInfo updates
+    // allInfo is the value containing the results from searching for contrasting colors from a picked one. 
+    
+   /*The useEffect listens for when allInfo value changes. As such when the user looks for another 
+   color, or clicks on the "get more button" which will cause allInfo value to update */    
     useEffect(()=>{
         if(!allInfo)return
         const length = allInfo.contrastColors.length
@@ -61,8 +68,9 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
     },[color,debouncedValue.count,setAllInfo,setErrorMessage,setLoading,setLoadingProgress])
     //Function that runs when user clicks on Search Constrasting Colors
     const choseFromColorInput =useCallback((input: keyof DebouncedValues)=>{  
-        //based on the color chosen on the input chosen by the user, the state of the color is set.
+        //based on the color chosen on the color input by the user, the state of the color is set.
         const mainVal = debouncedValue[input]   
+        console.log(mainVal, "MAIN")
         if(typeof mainVal == "string" ){
             if( input == "textInput"){
             setColor(mainVal)
@@ -75,11 +83,11 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
               setIsDisabled(true) 
         }     
     },[debouncedValue, color, setColor, setIsDisabled, setDebouncedValue]) 
-    /// A function meant to debounde the color input. 
+    /// A function meant to debounce the color input. 
     const updateDebouncedValue =useCallback((e: React.ChangeEvent<HTMLInputElement>)=>{      
              if(timerRef && timerRef.current)clearTimeout(timerRef.current)
-                 colorRef.current = e.target.value
-                  //due to closure we saved the current value here 
+                //due to closure we saved the current value here 
+                 colorRef.current = e.target.value               
             timerRef.current = setTimeout(()=>{         
                     //and we use it here
              setDebouncedValue(prev=>({ ...prev, textInput:colorRef.current}))
