@@ -14,6 +14,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     // This forces tokens to be managed securely internally by the client library
     storageKey: 'supabase-auth-tokens', // or a custom key
     storage: localStorage, // You might need to manage this differently for SSR
-  }},)
+  }
+},)
 
 

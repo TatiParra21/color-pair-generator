@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import type { ColorInfo } from "../types";
 import { supabase } from "../supabaseClient";
 import { getUserSavedSchemesRequest, } from "../functions/requestFunctions";
 import { type UserSchemeDataType } from "../types";

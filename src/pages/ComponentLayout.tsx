@@ -1,41 +1,22 @@
 import type { ColorSchemeType } from "../types"
 import { HexInfo } from "../components/HexInfo"
-import { colorDataStore, sortingStore, selectLoadingProgress, selectSetColor, selectSetDebouncedValue, paginationStore, selectLoading } from "../store/projectStore"
+import { sortingStore, paginationStore } from "../store/projectStore"
 import { PaginationComp } from "../components/PaginationComp"
 import { useMemo } from "react"
 import { ComponentBase } from "../components/ComponentBase"
 import { useReturnColorStoreData } from "../hooks/useReturnColorStoreData"
 import { useColorSearch } from "../hooks/useColorSearch"
-function getBrightness(hex: string): number {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return (r * 299 + g * 587 + b * 114) / 1000; // standard brightness formula
-}
+import { useOrderColors } from "../hooks/useOrderColors"
+
 export const ComponentLayout = ({ type }: { type: string }) => {
-    const loading = colorDataStore(selectLoading)
 
     const { color, debouncedValue } = useReturnColorStoreData()
     const { data: allInfo } = useColorSearch(color, debouncedValue.count)
-    const loadingProgress = colorDataStore(selectLoadingProgress)
-    const setDebouncedValue = colorDataStore(selectSetDebouncedValue)
-    const setColor = colorDataStore(selectSetColor)
+    const { loadingProgress, loading, setDebouncedValue, setColor } = useReturnColorStoreData()
     const total = paginationStore(state => state.total)
     const currentPage = paginationStore(state => state.currentPage)
     const sortType = sortingStore(state => state.sortType)
-
-    const contrastColorsOrdered = useMemo(() => {
-        if (!allInfo) return [];
-        let colors = allInfo.contrastColors;
-        if (sortType == "brightness") {
-            colors = [...colors].sort((a, b) => getBrightness(b.hex) - getBrightness(a.hex));
-        }
-        if (sortType == "ratio") {
-            colors = [...colors].sort((a, b) => Number(b.contrast_ratio) - Number(a.contrast_ratio));
-        }
-
-        return colors;
-    }, [allInfo, sortType])
+    const contrastColorsOrdered = useOrderColors(allInfo, sortType)
     const allComponents = useMemo(() => {
         return contrastColorsOrdered.map((schemecolor: ColorSchemeType) => {
             const { name, hex } = schemecolor

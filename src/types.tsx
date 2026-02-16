@@ -1,97 +1,95 @@
-export type ColorSchemeType ={
+export type ColorSchemeType = {
     clean_hex: string
-    name:string
+    name: string
     hex: string
-    contrast_ratio:string | number
-     aatext:boolean
+    contrast_ratio: string | number
+    aatext: boolean
     aaatext: boolean
     closest_named_hex: string
 }
-export type ColorAndSchemeType ={
+export type ColorAndSchemeType = {
     pickedColor: ColorInfo
     colorScheme: ColorSchemeTypeArr
 }
 
-/*
-export type SavedUserColorSchemeType={
-  user_id:string,
-  scheme_name:string,
-  hex1:string,
-  hex1name:string,
-  hex2:string,
-  hex2name:string,
-  contrast_ratio: number, 
-  aatext:boolean, 
-  aaatext:boolean
-}
-*/
-
-export type UserSchemeDataType ={
+export type SavedUserColorSchemeType = {
+    user_id: string,
     scheme_name: string,
-    hex1:string,
-    hex1name:string, 
-    hex2:string, 
-    hex2name:string,
-    contrast_ratio:number, 
+    hex1: string,
+    hex1name: string,
+    hex2: string,
+    hex2name: string,
+    contrast_ratio: number,
+    aatext: boolean,
+    aaatext: boolean
+}
+
+export type UserSchemeDataType = {
+    scheme_name: string,
+    hex1: string,
+    hex1name: string,
+    hex2: string,
+    hex2name: string,
+    contrast_ratio: number,
     aaatext: boolean,
-    aatext:boolean,  
-    id?:number,   
+    aatext: boolean,
+    id?: number,
 }
 export type ColorSchemeTypeArr = ColorSchemeType[]
 
 //Same color name type are all colors who have the same name but different hex numbers
-export type SameColorNameType ={
+export type SameColorNameType = {
     name: string,
     closest: string,
     hex: string
     variants: ColorSchemeType[]
 }
-export type ColorType ={
-    name: string, 
-    hex: string, 
+export type ColorType = {
+    name: string,
+    hex: string,
     clean_hex: string,
     closest_named_hex: string
 }
 //Color info is the chosen color with it's contrasting colors
-export type ColorInfo ={
-   mainColor: ColorType
+export type ColorInfo = {
+    mainColor: ColorType
     contrastColors: ColorSchemeTypeArr
 }
 
-export type ColorNameType = Omit<ColorInfo,"hex">
+export type ColorNameType = Omit<ColorInfo, "hex">
 
-export type FrontEndColorType ={
-name:string, closest_named_hex: string
+export type FrontEndColorType = {
+    name: string, closest_named_hex: string
 }
 
-export type ComponentStyleType ={
-  color: string
-  background:string
-  padding?: string
-  aspectRatio?:string
-  height?: string
-  width?:string
-  
+export type ComponentStyleType = {
+    color: string
+    background: string
+    padding?: string
+    aspectRatio?: string
+    height?: string
+    width?: string
+
 }
-export type ComponentType ={ 
-    variant:ColorSchemeType,
+export type ComponentType = {
+    variant: ColorSchemeType,
     colorName: string,
     mainStyle: ComponentStyleType,
-    
+
 }
 
-export type ComponentBaseType ={
+export type ComponentBaseType = {
     baseColor: string,
-    variant:ColorSchemeType,
+    variant: ColorSchemeType,
     colorName: string,
     type: string
 }
-export type VariantType ={
+export type VariantType = {
     contrastColor: ColorSchemeType,
     baseColor: string,
-   
+
 }
-export type Variant ={
+export type Variant = {
     variant: ColorSchemeType,
     baseColor: string,
 }

@@ -9,7 +9,7 @@ export const useReturnColorStoreData = () => {
             isDisabled: state.isDisabled,
             debouncedValue: state.debouncedValue,
             setColor: state.setColor,
-
+            loadingProgress: state.loadingProgress,
             setIsDisabled: state.setIsDisabled,
             setDebouncedValue: state.setDebouncedValue,
             setLoadingProgress: state.setLoadingProgress,
