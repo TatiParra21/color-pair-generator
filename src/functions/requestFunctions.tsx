@@ -208,7 +208,7 @@ export const saveColorSchemeForUser = async (pickedScheme: UserSchemeDataType) =
 
 export const updateSchemeNameForUser = async (id: number, scheme_name: string) => {
     try {
-        const { error } = await supabase.from("saved_user_color_schemes").upsert({ scheme_name: scheme_name }).eq("id", id)
+        const { error } = await supabase.from("saved_user_color_schemes").update({ scheme_name: scheme_name }).eq("id", id)
         if (error) throw error
 
     } catch (err) {
@@ -216,6 +216,7 @@ export const updateSchemeNameForUser = async (id: number, scheme_name: string) =
 
             console.log(err.message)
         }
+        console.log(err, "err")
         throw new Error(`in user updateSchemeNameForUser in requestFunctions ${err}`)
 
     }
