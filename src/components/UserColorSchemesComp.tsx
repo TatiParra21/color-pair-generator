@@ -2,7 +2,7 @@
 import { HexInfo } from "../components/HexInfo"
 import { useNavigate } from "react-router-dom"
 import { authStateStore, selectSession, selectUserSchemes } from "../store/projectStore"
-import { UserSchemeComponentBase } from "./ComponentBase"
+import { UserSchemeComponentBase } from "./UserSchemeComponentBase"
 import { LoadingRoller } from "./LoadingRoller"
 import { useState, useEffect } from "react"
 import type { UserSchemeDataType } from "../types"

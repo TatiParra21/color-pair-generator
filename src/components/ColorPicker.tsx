@@ -45,7 +45,6 @@ const ColorPicker = ({ children }: { children?: ReactNode }) => {
     const choseFromColorInput = useCallback((input: keyof DebouncedValues) => {
         //based on the color chosen on the color input by the user, the state of the color is set.
         const mainVal = debouncedValue[input]
-        console.log(mainVal, "MAIN")
         if (typeof mainVal == "string") {
             if (input == "textInput") {
                 setColor(mainVal)

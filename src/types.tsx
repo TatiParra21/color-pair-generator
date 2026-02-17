@@ -75,6 +75,7 @@ export type ComponentType = {
     variant: ColorSchemeType,
     colorName: string,
     mainStyle: ComponentStyleType,
+    baseColor: ColorType
 
 }
 
