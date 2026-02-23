@@ -6,6 +6,7 @@ import { handleError } from "../functions/handleError"
 import type { DebouncedValues } from "../store/projectStore"
 import { paginationStore } from "../store/projectStore"
 import { useColorSearch } from "../hooks/useColorSearch"
+import { usePagination } from "../hooks/usePagination"
 const ColorPicker = ({ children }: { children?: ReactNode }) => {
     const colorRef = useRef<string>("") //Reference to store latest color input, 
     const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -25,13 +26,7 @@ const ColorPicker = ({ children }: { children?: ReactNode }) => {
     const { data: allInfo, isLoading, error } = useColorSearch(color, debouncedValue.count)
     /*The useEffect listens for when allInfo value changes. As such when the user looks for another 
     color, or clicks on the "get more button" which will cause allInfo value to update */
-    useEffect(() => {
-        if (!allInfo) return
-        const length = allInfo.contrastColors.length
-        const totalPages = Math.max(1, Math.ceil(allInfo.contrastColors.length / 50))
-        setTotal(length)
-        setCurrentPage(totalPages)
-    }, [allInfo, setTotal, setCurrentPage])
+        usePagination(allInfo?.contrastColors,setTotal,setCurrentPage)
     //fetches color from API or supabase whenever the selected color changes or the count changes.
     useEffect(() => {
         // 1. Sync Loading (This handles start AND finally)

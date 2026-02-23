@@ -3,7 +3,6 @@ import { useShallow } from "zustand/shallow"
 export const useReturnColorStoreData = () => {
     return colorDataStore(
         useShallow((state: ColorDataStoreType) => ({
-
             loading: state.loading,
             color: state.color,
             isDisabled: state.isDisabled,
@@ -17,5 +16,4 @@ export const useReturnColorStoreData = () => {
             setErrorMessage: state.setErrorMessage
         }))
     );
-
 }

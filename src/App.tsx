@@ -5,9 +5,7 @@ import './BonusCSS/loadingCSS.css'
 import React, { useEffect, Suspense } from 'react'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
-
 const ComponentLayout = React.lazy(() => import("./pages/ComponentLayout"));
-const Cards = React.lazy(() => import("./pages/Cards"));
 const UserColorSchemesComp = React.lazy(() => import("./components/UserColorSchemesComp"));
 import { SubLayout } from './components/SubLayout'
 import { FormComponent } from './components/SignIn'
@@ -38,7 +36,7 @@ const router = createBrowserRouter([
         children: [
           { path: "badges", element: <ComponentLayout /> },
 
-          { path: "cards", element: <Cards /> },
+
         ]
       }
     ]

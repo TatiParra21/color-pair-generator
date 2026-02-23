@@ -1,24 +1,26 @@
 import type { ColorSchemeType } from "../types"
 import { HexInfo } from "../components/HexInfo"
-import { sortingStore, paginationStore } from "../store/projectStore"
+import { sortingStore, paginationStore,type PaginationStoreType } from "../store/projectStore"
 import { PaginationComp } from "../components/PaginationComp"
 import { useMemo } from "react"
 import { ComponentBase } from "../components/ComponentBase"
 import { useReturnColorStoreData } from "../hooks/useReturnColorStoreData"
 import { useColorSearch } from "../hooks/useColorSearch"
 import { useOrderColors } from "../hooks/useOrderColors"
-
+import { useShallow } from "zustand/shallow"
 const ComponentLayout = () => {
-
     const { color, debouncedValue } = useReturnColorStoreData()
     const { data: allInfo } = useColorSearch(color, debouncedValue.count)
     const baseColor = allInfo?.mainColor
     const { loadingProgress, loading, setDebouncedValue, setColor } = useReturnColorStoreData()
-    const total = paginationStore(state => state.total)
-    const currentPage = paginationStore(state => state.currentPage)
+   const { currentPage, pageSize, total, setCurrentPage } = paginationStore(useShallow((state: PaginationStoreType) => ({
+    currentPage: state.currentPage,
+    pageSize: state.pageSize,
+    total: state.total,
+    setCurrentPage: state.setCurrentPage
+  })))
     const sortType = sortingStore(state => state.sortType)
     const contrastColorsOrdered = useOrderColors(allInfo, sortType)
-    console.log(baseColor, "BASE")
     const allComponents = useMemo(() => {
         if (!baseColor) return <div>No Color Chosen</div>
         return contrastColorsOrdered.map((schemecolor: ColorSchemeType) => {
@@ -35,7 +37,6 @@ const ComponentLayout = () => {
     const { mainColor: { hex: mainHex, name: mainName } } = allInfo
     const loadMore = () => {
         setDebouncedValue(prev => ({ ...prev, count: prev.count + 50 }))
-        console.log("the cooo", color)
         setColor(color!)
     }
     return (
@@ -50,11 +51,11 @@ const ComponentLayout = () => {
                 </div>
             </div>
 
-            <PaginationComp />
+            <PaginationComp currentPage={currentPage} pageSize={pageSize} total={total} setCurrentPage={setCurrentPage} />
 
             <div className={`badges-sec`}>
                 {allComponents}
-                <PaginationComp />
+                <PaginationComp currentPage={currentPage} pageSize={pageSize} total={total} setCurrentPage={setCurrentPage} />
             </div>
         </div>
     )
