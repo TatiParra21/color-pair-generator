@@ -14,6 +14,7 @@ const UserColorSchemesComp = () => {
     const [totalSchemes, setTotalSchemes] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(0)
     const userSchemes: UserSchemeDataType[] | null = authStateStore(selectUserSchemes)
+      const [currentNameEdited, setCurrentNameEdited] = useState<string>("")
     const session = authStateStore(selectSession)
     const navigate = useNavigate()
     useEffect(() => {
@@ -24,15 +25,15 @@ const UserColorSchemesComp = () => {
         }
         loadColorSchemes()
     }, [session, loading,setLoading,navigate])
-    usePagination(userSchemes,setTotalSchemes,setCurrentPage, 20)
+    usePagination(userSchemes,setTotalSchemes,setCurrentPage,"reset", 20)
       const allComponents = useMemo(()=>{
         if (!userSchemes) return <div> "No colorSchemes yet"</div>
         return userSchemes.map((scheme: UserSchemeDataType) => {
-        return (<UserSchemeComponentBase key={`${scheme.hex1}-${scheme.hex2}-scheme`} userScheme={scheme} />)
+        return (<UserSchemeComponentBase currentNameEdited={currentNameEdited} setCurrentNameEdited={setCurrentNameEdited} key={`${scheme.hex1}-${scheme.hex2}-scheme`} userScheme={scheme} />)
         }
     ).slice((currentPage -1) * 20, currentPage *20)
 
-    },[currentPage,userSchemes]) 
+    },[currentPage,userSchemes, currentNameEdited]) 
     if (loading || !userSchemes) return <div>{loading ? <LoadingRoller /> : "no ColorSchemes yet"}</div>
    
   
@@ -40,12 +41,14 @@ const UserColorSchemesComp = () => {
     return (
         <div className="gap-2 items-center flex flex-col" >
             <HexInfo />
+            <PaginationComp currentPage={currentPage} pageSize={20} total={totalSchemes} setCurrentPage={setCurrentPage} />
+               <p>{currentNameEdited}</p>
             <div className="badges-sec">
-                <PaginationComp currentPage={currentPage} pageSize={20} total={totalSchemes} setCurrentPage={setCurrentPage} />
-                {allComponents}
-                <PaginationComp currentPage={currentPage} pageSize={20} total={totalSchemes} setCurrentPage={setCurrentPage} />
+                
+                 {allComponents}
+               
             </div>
-
+            <PaginationComp currentPage={currentPage} pageSize={20} total={totalSchemes} setCurrentPage={setCurrentPage} />
         </div>
     )
 }

@@ -75,16 +75,20 @@ export type PaginationStoreType = {
     pageSize: number,
     total: number,
     setTotal: (num: number) => void,
-    setCurrentPage: (page: number) => void
+    setCurrentPage: (page: number) => void,
+    pageMode: PageMode,
+    setPageMode: (mode: PageMode) => void
 
 }
-
+type PageMode = "reset" | "jumpToEnd"
 export const paginationStore = create<PaginationStoreType>(set => ({
     currentPage: 1,
     pageSize: 50,
     total: 0,
     setTotal: (num: number) => set({ total: num }),
-    setCurrentPage: (page: number) => set({ currentPage: page })
+    setCurrentPage: (page: number) => set({ currentPage: page }),
+    pageMode: "reset",
+    setPageMode: (mode: PageMode) => set({ pageMode: mode }),
 }))
 
 
@@ -126,11 +130,11 @@ export const authStateStore = create<AuthStateType>((set, get) => {
             try {
                 if (sessionInProgress) return
                 sessionInProgress = true
-                console.log("new sess")
                 const { data: { session: initialSession }, error } = await supabase.auth.getSession()
                 if (initialSession) {
                     set({ session: initialSession, email: initialSession.user.email });
                     // Start fetching data early
+                    console.log("Initial session found, fetching user schemes...")
                     get().updateUserSchemes();
                 }
                 const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -139,8 +143,6 @@ export const authStateStore = create<AuthStateType>((set, get) => {
                     // const schemes = await get().fetchUserSchemes();
                     // set({ set:data.session });
                 }
-
-
                 if (!get().authSubscription) {
                     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
                         console.log("change", event)

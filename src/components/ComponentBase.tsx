@@ -6,11 +6,14 @@ import { supabase } from "../supabaseClient"
 import { useNavigate } from "react-router-dom"
 import { type UserSchemeDataType, } from "../types"
 import { ColorDataInfoComp } from "./SubComponents/DataInfoComps"
+import { useShowTextCopied } from "../hooks/useShowTextCopied"
+import { TextCopiedBlock } from "./SubComponents/TextCopiedBlock"
 export const ComponentBase = ({ variant, colorName, mainStyle, baseColor }: ComponentType) => {
   const copyHex = colorDataStore(state => state.copyHex)
   const setIsDisabled = colorDataStore(state => state.setIsDisabled)
   const updateUserSchemes = authStateStore(selectUpdateUserSchemes)
   const userSchemes = authStateStore(state => state.userSchemes)
+  const { showCopied:showTextCopied, triggerShowCopied } = useShowTextCopied()
   const hexAndNamePairs = useMemo(() => {
     const pairs: [string, string][] = [
       [baseColor.hex, baseColor.name],
@@ -34,6 +37,7 @@ export const ComponentBase = ({ variant, colorName, mainStyle, baseColor }: Comp
     if (hexValue) {
       navigator.clipboard.writeText(hexValue)
       copyHex(hexValue)
+      triggerShowCopied()
       setIsDisabled(false)
     }
   }
@@ -75,7 +79,14 @@ export const ComponentBase = ({ variant, colorName, mainStyle, baseColor }: Comp
       <p className="border-solid border-black border-1" ref={refValue} style={{ ...baseColorAsBackgroundStyle, }} >
         {` ${variant?.hex}`}
       </p>
-      <span style={{ cursor: "pointer", userSelect: "none" }} onClick={onCopy}>Copy</span>
+      <span className="cursor-pointer
+                    select-none
+                    text-gray-500
+                    hover:text-blue-500
+                    active:scale-95
+                    transition
+                    duration-150"
+                    onClick={onCopy}>Copy</span>
       <div className=" flex  flex-col gap-2">
         {textType == "Normal" && <>
           <ColorDataInfoComp contrast_ratio={contrast_ratio} aatext={aatext} aaatext={aaatext} />
@@ -86,6 +97,8 @@ export const ComponentBase = ({ variant, colorName, mainStyle, baseColor }: Comp
         <button disabled={alreadyExists} onClick={redirectOrSave}>{alreadyExists ? "Color already Saved" :
           "Save ColorScheme"}</button>
       </div>
+      {showTextCopied && <TextCopiedBlock />}
+      
     </div>
   )
 }

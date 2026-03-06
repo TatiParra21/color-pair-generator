@@ -120,7 +120,7 @@ export const generateContrastingColors = async (baseColor: string, count: number
     const maxEmpty = 20
     let ranOut = false
     while (bestColors.length < count && attempts < maxTries && !ranOut) {
-      console.log("ATTEMPTS", attempts, count)
+      //console.log("ATTEMPTS", attempts, count)
       if (turn >= contrastColor.length) turn = 0
       ///current color it the current main color chosen
       const currentColor = contrastColor[turn]
@@ -132,7 +132,7 @@ export const generateContrastingColors = async (baseColor: string, count: number
         uniqueHexes.map((hexVal: string) => limit(() => getOrAddColorCatched(hexVal))))
       const uniqueHexesUpdated = results.filter(color => color.status == "fulfilled").map(col => col.value)
       const filteredColors: ColorSchemeTypeArr = await colorContrastTest(baseColor, manager, uniqueHexesUpdated)
-      console.log("results", results)
+      //console.log("results", results)
       if (filteredColors.length > 0) {
         bestColors.push(...filteredColors)
       } else {
@@ -154,10 +154,8 @@ export const generateContrastingColors = async (baseColor: string, count: number
 }
 
 const getContrastsInDB = async (hex: string, count: number, setLoadingProgress: (val: string) => void): Promise<ColorSchemeType[]> => {
-  console.log(hex, "checkign")
   //returns if color has  contrasts
   const storedContrasts: ColorSchemeType[] | null = await checkIfContrastIn(hex)
-  console.log(storedContrasts, "sotree")
   /*
  if there are no contrasts stored in the database, generateContrastingColors will generate based on the count which is default 50
  if there is matching colors in the db we will check if the length found is higher then what was asked.
@@ -165,30 +163,24 @@ const getContrastsInDB = async (hex: string, count: number, setLoadingProgress: 
  */
   let contrasts: ColorSchemeType[] = !storedContrasts
     ? await generateContrastingColors(hex, count, setLoadingProgress)
-    : storedContrasts.length >= count ? storedContrasts.slice(0, count)
+    : storedContrasts.length >= count ? storedContrasts
       : storedContrasts
-  console.log("chekcin contrast", contrasts)
+  //console.log("chekcin contrast", contrasts)
   /*if the contrast colors found are less then the count, then more are generated. The contrasts from the database
   are returned along with new ones. */
   if (contrasts.length < count && storedContrasts && storedContrasts.length > 0) {
-    console.log("did it run here?", count, contrasts)
     const dbColors: ColorSchemeType[] = storedContrasts
     const newAdded: ColorSchemeType[] = await generateContrastingColors(hex, count - dbColors.length, setLoadingProgress, dbColors)
     contrasts = [...dbColors, ...newAdded]
   } return contrasts
 }
 const getColorInfo = async (pick: string, count: number = 10, setLoadingProgress: (val: string) => void): Promise<ColorInfo> => {
-  console.log(pick, "piick cin this")
   const picked = pick.toUpperCase()
   const mainColor: ColorType = await handleSingleColor(picked)
-  console.log(mainColor, "main")
   if (!mainColor) throw new Error("main color not found")
-  console.log(mainColor.hex, "SEEING")
   const contrastNames: ColorSchemeTypeArr = await getContrastsInDB(mainColor.hex, count, setLoadingProgress)
-  console.log(contrastNames, "names")
   if (!contrastNames) throw new Error("Contrast colors not  ffound")
   return { mainColor, contrastColors: contrastNames }
-
 }
 
 export default getColorInfo

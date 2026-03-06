@@ -20,6 +20,7 @@ body {
   background-color: white;
   color: black;
   background: #f6f7fb;
+  
 }
 
 h1 {
@@ -55,22 +56,31 @@ nav {
 
 .badges-sec {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1em;
   width: 100%;
   margin-top: 1rem;
+
 }
 
 .single-badge-style {
-  display: flex;
-  flex-direction: column;
-
-
-
+ display: flex;              /* ✅ IMPORTANT */
+  flex-direction: column;     /* ✅ IMPORTANT */
+           /* ✅ gives mt-auto space */
+  padding: 0.75rem;           /* ✅ makes it look like a card */
+  background: white;          /* ✅ visible card */
+  border: 1px solid #111;  
   font-weight: bold;
   border-radius: 1rem;
 }
-
+.single-badge-style input{
+  width: 100%;
+}
+.badge-title {
+  line-height: 1.2;
+  min-height: calc(1.2em * 2); /* ✅ exactly 2 lines tall */
+  text-align: center;
+}
 /* display flex */
 nav,
 .color-picker-sec,
@@ -96,15 +106,23 @@ form input {
 }
 
 .color-div:hover {
-  border: solid 2px red;
+  border: solid 2px #57509D;
 }
-
+button{
+  border: solid #57509D 2px
+}
 button:disabled {
   color: gray;
+  border:none;
 }
-
+button:hover {
+  background: #57509D;
+  color:white
+}
 button:disabled:hover {
   border: none;
+  color: gray;
+  background: #f6f7fb;
 }
 
 
@@ -121,7 +139,9 @@ button:disabled:hover {
 /* Small devices (large phones, 600px and up) */
 @media (max-width: 600px) {
   /* styles */
-
+  .badges-sec {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Medium devices (tablets, 768px and up) */

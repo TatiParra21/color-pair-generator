@@ -15,8 +15,8 @@ export const HexInfo = (): JSX.Element => {
     const currentPath = navigate.pathname
     return (
         <>
-            <div className="flex">
-                <div className="border-solid border-2 border-black self-start ">
+            <div className="flex gap-2 m-t-2 border-2 border-gray-300 rounded-md p-4">
+                <div className=" self-start ">
                     <div className="flex flex-row justify-center items-center gap-2 k">
                         <h3>{` Currently Measuring ${textType} text size.`}</h3>
 

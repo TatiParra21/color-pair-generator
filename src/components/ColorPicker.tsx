@@ -22,24 +22,28 @@ const ColorPicker = ({ children }: { children?: ReactNode }) => {
     } = useReturnColorStoreData()
     const setTotal = paginationStore(state => state.setTotal)
     const setCurrentPage = paginationStore(state => state.setCurrentPage)
+    const pageMode = paginationStore(state => state.pageMode)
+    const setPageMode = paginationStore(state => state.setPageMode)
     // allInfo is the value containing the results from searching for contrasting colors from a picked one. 
     const { data: allInfo, isLoading, error } = useColorSearch(color, debouncedValue.count)
     /*The useEffect listens for when allInfo value changes. As such when the user looks for another 
     color, or clicks on the "get more button" which will cause allInfo value to update */
-        usePagination(allInfo?.contrastColors,setTotal,setCurrentPage)
+        usePagination(allInfo?.contrastColors,setTotal,setCurrentPage,pageMode)
     //fetches color from API or supabase whenever the selected color changes or the count changes.
     useEffect(() => {
         // 1. Sync Loading (This handles start AND finally)
         setLoading(isLoading)
+        setIsDisabled(isLoading)
         // 2. Sync Error (This handles catch)
         if (error) {
             setErrorMessage(handleError(error, "ColorPicker"))
         }
-    }, [isLoading, error, setLoading, setErrorMessage])
+    }, [isLoading, error, setLoading, setErrorMessage,setIsDisabled])
     //Function that runs when user clicks on Search Constrasting Colors
     const choseFromColorInput = useCallback((input: keyof DebouncedValues) => {
         //based on the color chosen on the color input by the user, the state of the color is set.
         const mainVal = debouncedValue[input]
+        setPageMode("reset");
         if (typeof mainVal == "string") {
             if (input == "textInput") {
                 setColor(mainVal)

@@ -24,9 +24,11 @@ const UserIsSignedIn = ({ email }: { email: string, }) => {
 const Layout = () => {
     const session = authStateStore(selectSession)
     const email = authStateStore(selectEmail)
-    console.log(session, "SESION hER")
+    
     if (!session) {
         console.log("no sessi on")
+    }else if(session) {
+        console.log("there is a session")
     }
     return (
         <>
